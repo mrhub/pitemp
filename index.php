@@ -4,9 +4,9 @@ if (!empty($_POST["dtp_input1"])){
   $dtp_input1_show = substr($dtp_input1, 0, strlen($dtp_input1) - 3);
 } else {
   $date = new DateTime();
-    //echo $date->format('Y-m-d H:i:s') . "</br>";
+    echo $date->format('Y-m-d H:i:s') . "</br>";
   $date->sub(new DateInterval('PT6H'));
-    //echo $date->format('Y-m-d H:i:s') . "</br>";
+    echo $date->format('Y-m-d H:i:s') . "</br>";
   $dtp_input1 = $date->format('Y-m-d H:i:s');
   $dtp_input1_show = $date->format('Y-m-d H:i');
 }
@@ -153,7 +153,7 @@ if (!empty($_POST["dropvalue"])){
   {
     function __construct()
     {
-     $this->open('templog.db');
+     $this->open('temps.sqlite');
    }
  }
 
@@ -165,15 +165,18 @@ if (!empty($_POST["dropvalue"])){
 }
 if (substr($dropvalue, 0, 1) == "6") {
   $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-6 hours');";
+  echo $sql . "</br>";
 } else if (substr($dropvalue, 0, 1) == "1"){
   $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-1 hours'); ";
+  echo $sql . "</br>";
 } else if (substr($dropvalue, 0, 2) == "24") {
   $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-24 hours');";
+  echo $sql . "</br>";
 } else{
 
  $sql = "select * from temps where timestamp > datetime('" . $dtp_input1 . "')";
  $sql = $sql . " and timestamp < datetime('" . $dtp_input2 . "')";
-       //echo $sql . "</br>";
+       echo $sql . "</br>";
 }
 
 echo '<script type="text/javascript" src="https://www.google.com/jsapi"></script>' . "\n";
@@ -182,15 +185,17 @@ echo "\t" . 'google.load("visualization", "1", {packages:["corechart"]});' . "\n
 echo "\t" . 'google.setOnLoadCallback(drawChart);' . "\n";
 echo "\t" . 'function drawChart() {' . "\n";
 echo "\t\t" . 'var data = google.visualization.arrayToDataTable([' . "\n";
-echo "\t\t" . "['timestamp', 'DS1820_1', 'DS1820_2', 'DS18B20'],\n";
+echo "\t\t" . "['timestamp', 'Temp', 'Humidity', 'DS1820_1', 'DS1820_2', 'DS18B20'],\n";
 $ret = $db->query($sql);
 $array = array();
 while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
   $arr = [];
   array_push($arr, "'" . substr($row['timestamp'],0,-3) . "'");
-  array_push($arr, "" . $row['DS1820_1'] . "");
-  array_push($arr, "" . $row['DS1820_2'] . "");
-  array_push($arr, "" . $row['DS18B20'] . "");
+  array_push($arr, "" . round($row['temp']) . "");
+  array_push($arr, "" . round($row['humidity']) . "");
+  array_push($arr, "" . round($row['DS1820_1']) . "");
+  array_push($arr, "" . round($row['DS1820_2']) . "");
+  array_push($arr, "" . round($row['DS18B20']) . "");
   array_push($array, implode($arr, ","));
 }
 echo "[" . implode($array, "],\n[") . "]\n";
@@ -203,10 +208,12 @@ echo "\t\tcurveType: 'none',\n";
 echo "\t\tlegend: { position: 'bottom' },\n";
 echo "\t\tseries: {\n";
 echo "\t\t0: {targetAxisIndex: 0}\n";
+echo "\t\t,1: {targetAxisIndex: 1}\n";
 echo "\t\t},\n";
 echo "\t\tvAxes: {\n";
 echo "\t\t// Adds titles to each axis.\n";
 echo "\t\t0: {title: 'Temperature (Celsius)'}\n";
+echo "\t\t,1: {title: 'Humidity (Percent)'}\n";
 echo "\t\t},\n";
 echo "\t\t};\n";
 echo "\t\tvar chart = new google.visualization.LineChart(document.getElementById('chart_div'));\n";
@@ -239,7 +246,7 @@ $db->close();
        $query = $query . " and timestamp < datetime('" . $dtp_input2 . "')";
      }
 
-      //echo $query . "</br>";
+      echo $query . "</br>";
 
      $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
      $num_columns =  $result->numColumns(); 
@@ -251,10 +258,15 @@ $db->close();
     echo "<tbody>\n";
     while($row = $result->fetchArray(SQLITE3_ASSOC) ){
       echo "<tr\n>";
-      echo "<td>" . $row['timestamp'] . "</td>";
-      echo "<td>" . $row['DS1820_1'] . "</td>";
-      echo "<td>" . $row['DS1820_2'] . "</td>";
-      echo "<td>" . $row['DS18B20'] . "</td>";
+      for ($i = 0; $i < $num_columns; $i++) {
+        echo "<td>" . $row[$result->columnName($i)] . "</td>";
+      }
+      //echo "<td>" . $row['timestamp'] . "</td>";
+      //echo "<td>" . $row['temp'] . "</td>";
+      //echo "<td>" . $row['humidity'] . "</td>";
+      //echo "<td>" . $row['DS1820_1'] . "</td>";
+      //echo "<td>" . $row['DS1820_2'] . "</td>";
+      //echo "<td>" . $row['DS18B20'] . "</td>";
       echo "</tr>\n";
     }
     $db->close();
