@@ -118,8 +118,10 @@ if (!empty($_POST["dropvalue"])){
     var dateFrom = "";
     var dateNow = "";
   }
-  setDate("#dtp_input1", dateFrom);
-  setDate("#dtp_input2", dateNow);
+  //setDate("#dtp_input1", dateFrom);
+  //setDate("#dtp_input2", dateNow);
+  converDateAndSetDateField("#dtp_input1", dateFrom);
+  converDateAndSetDateField("#dtp_input2", dateNow);
   $("#datepicker").submit();
 });
 
@@ -137,6 +139,15 @@ if (!empty($_POST["dropvalue"])){
       $(datafield).attr("value", date + " " + time);
     }
   }
+
+function converDateAndSetDateField(datafield, indate) {
+if (indate == ""){
+      $(datafield).attr("value", "");
+    } else {
+    var value = indate.toISOString();
+    $(datafield).attr("value", value.substring(0, 10) + " " + indate.getHours() + ":" + indate.getMinutes() + ":" + indate.getSeconds());
+  }
+}
 
   Date.prototype.addHours= function(h){
     this.setHours(this.getHours()+h);
