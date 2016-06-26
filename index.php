@@ -4,9 +4,9 @@ if (!empty($_POST["dtp_input1"])){
   $dtp_input1_show = substr($dtp_input1, 0, strlen($dtp_input1) - 3);
 } else {
   $date = new DateTime();
-    echo $date->format('Y-m-d H:i:s') . "</br>";
+  //echo $date->format('Y-m-d H:i:s') . "</br>";
   $date->sub(new DateInterval('PT6H'));
-    echo $date->format('Y-m-d H:i:s') . "</br>";
+  //echo $date->format('Y-m-d H:i:s') . "</br>";
   $dtp_input1 = $date->format('Y-m-d H:i:s');
   $dtp_input1_show = $date->format('Y-m-d H:i');
 }
@@ -277,9 +277,9 @@ $db->close();
 </div>
 
 <?php
-// foreach($_POST as $key => $value) {
-//   echo "POST parameter '$key' has '$value'</br>";
-// }
+ foreach($_POST as $key => $value) {
+   echo "POST parameter '$key' has '$value'</br>";
+ }
 ?>
 </body>
 </html>
