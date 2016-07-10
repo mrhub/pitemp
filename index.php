@@ -326,6 +326,11 @@ $db->close();
 
 <?php 
 function getMaxPoolToday(){
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select * from temps where timestamp > datetime('now', 'localtime', '-6 hours'); ";
   return 25.4;
 }
 ?>
