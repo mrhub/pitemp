@@ -120,13 +120,12 @@ if (indate == ""){
 
 <body>
   <div class="container">
-  
     <div class="row">
         <div class="col-md-4">
           <div class="panel panel-default">
             <div class="panel-heading"><h3>Pool</h3></div>
             <div class="panel-body">
-              Max temp idag: <br/>
+              Max temp idag: <?php echo getMaxPoolToday(); ?><br/>
               Max temp senaste 24 timmar: <br/>
             </div>
           </div>
@@ -155,7 +154,7 @@ if (indate == ""){
 <div class="container">
     <div id="chart_div" style="width: 100%; height: 700px;"></div>
   </div>
-  
+
 
   <div class="container">
     <form id="datepicker" action="" class="form-horizontal" role="form" method="post">
@@ -325,6 +324,11 @@ $db->close();
 // }
 ?>
 
+<?php 
+function getMaxPoolToday(){
+  return 25.4;
+}
+?>
 
 </body>
 </html>
