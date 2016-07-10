@@ -33,58 +33,19 @@ if (!empty($_POST["dropvalue"])){
   <link href="./css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
 </head>
 
-<body>
-  <div class="container">
-    <form id="datepicker" action="" class="form-horizontal" role="form" method="post">
-      <fieldset>
-        <legend>Tidsintervall</legend>
-        <div class="form-group">
-          <label for="dtp_input1" class="col-md-2 control-label">Från</label>
-          <div class="input-group date form_datetime col-md-5" data-date-format="yyyy-mm-dd hh:ii" data-link-field="dtp_input1">
-            <input id="dtp_input1_show" class="form-control" size="10" type="text" value="<?php echo $dtp_input1_show; ?>" onChange="changeDropDown()">
-            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-          </div>
-          <input type="hidden" id="dtp_input1" name="dtp_input1" value="<?php echo $dtp_input1; ?>" /><br/><br/>
-
-          <label for="dtp_input2" class="col-md-2 control-label">Till</label> 
-          <div class="input-group date form_datetime col-md-5" data-date-format="yyyy-mm-dd hh:ii" data-link-field="dtp_input2">
-            <input class="form-control" size="10" type="text" value="<?php echo $dtp_input2_show; ?>" onChange="changeDropDown()">
-            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-          </div>
-          <input type="hidden" id="dtp_input2" name="dtp_input2" value="<?php echo $dtp_input2; ?>"/><br/>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-2 col-md-offset-2">
-            <div class="input-group">
-              <div class="input-group-btn">
-                <button id="thebutton" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo $dropvalue; ?><span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                  <li id="litid1"><a href="#">1 timme</a></li>
-                  <li id="litid6"><a href="#">6 timmar</a></li>
-                  <li id="litid24"><a href="#">24  timmar</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li id="litid99"><a href="#">Eget intervall</a></li>
-                </ul>
-              </div><!-- /btn-group -->
-            </div><!-- /input-group -->
-          </div><!-- /.col-lg-2 -->
-          <div class="col-lg-4">
-            <input type="submit" class="btn btn-default"></input>
-          </div><!-- /.col-lg-4 -->
-        </div><!-- /.row -->
-        <input type="hidden" name="dropvalue" id="dropvalue" value="<?php echo $dropvalue; ?>">
-      </fieldset>
-    </form>
-  </div>
-
-  <script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
   <script type="text/javascript" src="./bootstrap/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="./js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
   <script type="text/javascript" src="./js/locales/bootstrap-datetimepicker.sv.js" charset="UTF-8"></script>
   <script type="text/javascript">
+
+  $(document).ready(function () {
+    $(window).resize(function(){
+        console.log("drawChart from resize");
+        drawChart();
+    });
+  });
+
   $('.form_datetime').datetimepicker({
     language:  'sv',
     weekStart: 1,
@@ -153,11 +114,94 @@ if (indate == ""){
     this.setHours(this.getHours()+h);
     return this;
   }
-  </script>
+</script>
+
+<br/>
+
+<body>
+  <div class="container">
+  
+    <div class="row">
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading"><h3>Pool</h3></div>
+            <div class="panel-body">
+              Max temp idag: <br/>
+              Max temp senaste 24 timmar: <br/>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading"><h3>DS1820_1</h3></div>
+            <div class="panel-body">
+              Max temp idag: <br/>
+              Max temp senaste 24 timmar: <br/>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading"><h3>DS1820_2</h3></div>
+            <div class="panel-body">
+              Max temp idag: <br/>
+              Max temp senaste 24 timmar: <br/>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div id="chart_div" style="width: 100%; height: 700px;"></div>
+  </div>
+  
 
   <div class="container">
-    <div id="chart_div" style="width: 1200px; height: 700px;"></div>
-  </div><!-- /.container -->
+    <form id="datepicker" action="" class="form-horizontal" role="form" method="post">
+      <fieldset>
+        <legend>Tidsintervall</legend>
+        <div class="form-group">
+          <label for="dtp_input1" class="col-md-2 control-label">Från</label>
+          <div class="input-group date form_datetime col-md-5" data-date-format="yyyy-mm-dd hh:ii" data-link-field="dtp_input1">
+            <input id="dtp_input1_show" class="form-control" size="10" type="text" value="<?php echo $dtp_input1_show; ?>" onChange="changeDropDown()">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+          </div>
+          <input type="hidden" id="dtp_input1" name="dtp_input1" value="<?php echo $dtp_input1; ?>" /><br/><br/>
+
+          <label for="dtp_input2" class="col-md-2 control-label">Till</label> 
+          <div class="input-group date form_datetime col-md-5" data-date-format="yyyy-mm-dd hh:ii" data-link-field="dtp_input2">
+            <input class="form-control" size="10" type="text" value="<?php echo $dtp_input2_show; ?>" onChange="changeDropDown()">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+          </div>
+          <input type="hidden" id="dtp_input2" name="dtp_input2" value="<?php echo $dtp_input2; ?>"/><br/>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-2 col-md-offset-2">
+            <div class="input-group">
+              <div class="input-group-btn">
+                <button id="thebutton" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo $dropvalue; ?><span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                  <li id="litid1"><a href="#">1 timme</a></li>
+                  <li id="litid6"><a href="#">6 timmar</a></li>
+                  <li id="litid24"><a href="#">24  timmar</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li id="litid99"><a href="#">Eget intervall</a></li>
+                </ul>
+              </div><!-- /btn-group -->
+            </div><!-- /input-group -->
+          </div><!-- /.col-lg-2 -->
+          <div class="col-lg-4">
+            <input type="submit" class="btn btn-default"></input>
+          </div><!-- /.col-lg-4 -->
+        </div><!-- /.row -->
+        <input type="hidden" name="dropvalue" id="dropvalue" value="<?php echo $dropvalue; ?>">
+      </fieldset>
+    </form>
+  </div>
 
   <?php
   class MyDB extends SQLite3
@@ -208,8 +252,8 @@ echo "[" . implode($array, "],\n[") . "]\n";
 echo "\t]);\n";
 echo "\tvar options = {\n";
    //echo "\t\ttitle: 'Temperature and humidity',\n";
-echo "\t\twidth: 1200,\n";
-echo "\t\theight: 700,\n";
+//echo "\t\twidth: 1200,\n";
+//echo "\t\theight: 700,\n";
 echo "\t\tcurveType: 'none',\n";
 echo "\t\tlegend: { position: 'bottom' },\n";
 echo "\t\tseries: {\n";
@@ -280,5 +324,7 @@ $db->close();
 //   echo "POST parameter '$key' has '$value'</br>";
 // }
 ?>
+
+
 </body>
 </html>
