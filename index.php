@@ -208,12 +208,14 @@ if (indate == ""){
   }
 
 </script>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<!--<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>-->
 <script type="text/javascript">
-google.charts.load('current', {packages: ['corechart', 'line']});
-google.charts.setOnLoadCallback(drawPoolChart);
-google.charts.setOnLoadCallback(drawDS1820_1Chart);
-google.charts.setOnLoadCallback(drawDS1820_2Chart);
+//google.load('current', {packages: ['corechart', 'line']});
+google.load("visualization", "1", {packages:["corechart"]});
+google.setOnLoadCallback(drawPoolChart);
+google.setOnLoadCallback(drawDS1820_1Chart);
+google.setOnLoadCallback(drawDS1820_2Chart);
 
   function drawPoolChart() {
       var data = new google.visualization.DataTable();
@@ -332,7 +334,7 @@ if (substr($dropvalue, 0, 1) == "6") {
        //echo $sql . "</br>";
 }
 
-echo '<script type="text/javascript" src="https://www.google.com/jsapi"></script>' . "\n";
+//echo '<script type="text/javascript" src="https://www.google.com/jsapi"></script>' . "\n";
 echo '<script type="text/javascript">' . "\n";
 echo "\t" . 'google.load("visualization", "1", {packages:["corechart"]});' . "\n";
 echo "\t" . 'google.setOnLoadCallback(drawChart);' . "\n";
@@ -341,6 +343,8 @@ echo "\t\t" . 'var data = google.visualization.arrayToDataTable([' . "\n";
 echo "\t\t" . "['timestamp', 'DS1820_1', 'DS1820_2', 'DS18B20'],\n";
 $ret = $db->query($sql);
 $array = array();
+$dateArray = array();
+$index = 0;
 while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
   $arr = [];
   array_push($arr, "'" . substr($row['timestamp'],0,-3) . "'");
@@ -348,18 +352,32 @@ while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
   array_push($arr, "" . $row['DS1820_2'] . "");
   array_push($arr, "" . $row['DS18B20'] . "");
   array_push($array, implode($arr, ","));
+  if ($index++ % 10 == 0) {
+    array_push($dateArray, "'" . substr($row['timestamp'],0,-3) . "'");
+  }
+  
 }
 echo "[" . implode($array, "],\n[") . "]\n";
 echo "\t]);\n";
 echo "\tvar options = {\n";
-echo "\t\tchartArea:{left:0,top:0,width:'100%',height:'100%'},\n";
+//echo "\t\tchartArea:{left:10,top:10,width:'80%',height:'80%'},\n";
+echo "\t\tchartArea:{";
+//echo "left:10,";
+echo "top:10,";
+echo "width:'90%',";
+echo "height:'70%'},\n";
 echo "\t\tcurveType: 'none',\n";
 echo "\t\tlegend: { position: 'bottom' },\n";
-echo "\t\tseries: {\n";
-echo "\t\t0: {targetAxisIndex: 0}\n";
+//echo "\t\tseries: {\n";
+//echo "\t\t0: {targetAxisIndex: 0}\n";
+//echo "\t\t},\n";
+echo "\t\thAxis: {\n";
+echo "\t\t\ttics: [" . implode($dateArray, ",") . "]\n";
+//echo "\t\t\t\n"
+//echo "\t\t\t\n"
 echo "\t\t},\n";
 echo "\t\tvAxes: {\n";
-echo "\t\t// Adds titles to each axis.\n";
+//echo "\t\t// Adds titles to each axis.\n";
 echo "\t\t0: {title: 'Temperature (Celsius)'}\n";
 echo "\t\t},\n";
 echo "\t\t};\n";
@@ -367,7 +385,7 @@ echo "\t\tvar chart = new google.visualization.LineChart(document.getElementById
 echo "\t\tchart.draw(data, options);\n";
 echo "\t}\n";
 echo "\t</script>\n";
-   //echo "Operation done successfully\n";
+echo implode($dateArray, ",");
 $db->close();
 ?>
 
