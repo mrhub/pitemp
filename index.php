@@ -33,7 +33,99 @@ if (!empty($_POST["dropvalue"])){
   <link href="./css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
 </head>
 
-<script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+<br/>
+
+<body>
+  <div class="container">
+    <div class="row">
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading"><h3>Pool : <?php echo getPoolTempNow(); ?> &deg;C</h3></div>
+            <div class="panel-body">
+              Max temp idag : <?php echo getMaxPoolToday(); ?> &deg;C<br/>
+              Min temp idag : <?php echo getMinPoolToday(); ?> &deg;C<br/>
+              <h4>Senaste 30 minuterna:</h4>
+              <div id="chart_pool"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading"><h3>DS1820_1 : <?php echo getDS1820_1TempNow(); ?> &deg;C</h3></div>
+            <div class="panel-body">
+              Max temp idag : <?php echo getMaxDS1820_1Today(); ?> &deg;C<br/>
+              Min temp idag : <?php echo getMinDS1820_1Today(); ?> &deg;C<br/>
+              <h4>Senaste 30 minuterna:</h4>
+              <div id="DS1820_1"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="panel panel-default">
+            <div class="panel-heading"><h3>DS1820_2 : <?php echo getDS1820_2TempNow(); ?> &deg;C</h3></div>
+            <div class="panel-body">
+              Max temp idag : <?php echo getMaxDS1820_2Today(); ?> &deg;C<br/>
+              Min temp idag : <?php echo getMinDS1820_2Today(); ?> &deg;C<br/>
+              <h4>Senaste 30 minuterna:</h4>
+              <div id="DS1820_2"></div>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div id="chart_div" style="width: 100%; height: 700px;"></div>
+  </div>
+
+
+  <div class="container">
+    <form id="datepicker" action="" class="form-horizontal" role="form" method="post">
+      <fieldset>
+        <legend>Tidsintervall</legend>
+        <div class="form-group">
+          <label for="dtp_input1" class="col-md-2 control-label">Från</label>
+          <div class="input-group date form_datetime col-md-5" data-date-format="yyyy-mm-dd hh:ii" data-link-field="dtp_input1">
+            <input id="dtp_input1_show" class="form-control" size="10" type="text" value="<?php echo $dtp_input1_show; ?>" onChange="changeDropDown()">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+          </div>
+          <input type="hidden" id="dtp_input1" name="dtp_input1" value="<?php echo $dtp_input1; ?>" /><br/><br/>
+
+          <label for="dtp_input2" class="col-md-2 control-label">Till</label> 
+          <div class="input-group date form_datetime col-md-5" data-date-format="yyyy-mm-dd hh:ii" data-link-field="dtp_input2">
+            <input class="form-control" size="10" type="text" value="<?php echo $dtp_input2_show; ?>" onChange="changeDropDown()">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+          </div>
+          <input type="hidden" id="dtp_input2" name="dtp_input2" value="<?php echo $dtp_input2; ?>"/><br/>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-2 col-md-offset-2">
+            <div class="input-group">
+              <div class="input-group-btn">
+                <button id="thebutton" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo $dropvalue; ?><span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                  <li id="litid1"><a href="#">1 timme</a></li>
+                  <li id="litid6"><a href="#">6 timmar</a></li>
+                  <li id="litid24"><a href="#">24  timmar</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li id="litid99"><a href="#">Eget intervall</a></li>
+                </ul>
+              </div><!-- /btn-group -->
+            </div><!-- /input-group -->
+          </div><!-- /.col-lg-2 -->
+          <div class="col-lg-4">
+            <input type="submit" class="btn btn-default"></input>
+          </div><!-- /.col-lg-4 -->
+        </div><!-- /.row -->
+        <input type="hidden" name="dropvalue" id="dropvalue" value="<?php echo $dropvalue; ?>">
+      </fieldset>
+    </form>
+  </div>
+
+  <script type="text/javascript" src="./jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
   <script type="text/javascript" src="./bootstrap/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="./js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
   <script type="text/javascript" src="./js/locales/bootstrap-datetimepicker.sv.js" charset="UTF-8"></script>
@@ -41,7 +133,7 @@ if (!empty($_POST["dropvalue"])){
 
   $(document).ready(function () {
     $(window).resize(function(){
-        console.log("drawChart from resize");
+        //console.log("drawChart from resize");
         drawChart();
     });
   });
@@ -114,93 +206,103 @@ if (indate == ""){
     this.setHours(this.getHours()+h);
     return this;
   }
+
 </script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawPoolChart);
+google.charts.setOnLoadCallback(drawDS1820_1Chart);
+google.charts.setOnLoadCallback(drawDS1820_2Chart);
 
-<br/>
+  function drawPoolChart() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', '');
+      data.addColumn('number', '');
+      data.addRows([
+['2016-07-11 09:25',26.375],
+['2016-07-11 09:30',26.375],
+['2016-07-11 09:35',26.375],
+['2016-07-11 09:40',26.437],
+['2016-07-11 09:45',26.437],
+['2016-07-11 09:50',26.437]
+      ]);
 
-<body>
-  <div class="container">
-    <div class="row">
-        <div class="col-md-4">
-          <div class="panel panel-default">
-            <div class="panel-heading"><h3>Pool</h3></div>
-            <div class="panel-body">
-              Max temp idag: <?php echo getMaxPoolToday(); ?><br/>
-              Max temp senaste 24 timmar: <br/>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="panel panel-default">
-            <div class="panel-heading"><h3>DS1820_1</h3></div>
-            <div class="panel-body">
-              Max temp idag: <br/>
-              Max temp senaste 24 timmar: <br/>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="panel panel-default">
-            <div class="panel-heading"><h3>DS1820_2</h3></div>
-            <div class="panel-body">
-              Max temp idag: <br/>
-              Max temp senaste 24 timmar: <br/>
-            </div>
-          </div>
-        </div>
-    </div>
-</div>
+      var options = {
+      hAxis:{
+         textPosition: 'none'
+       },
+       
+      vAxis:{
+         textPosition: 'none',
+       },
+       legend: {position : 'none'},
+       chartArea:{left:0,top:0,width:'100%',height:'100%'}
+      };
 
-<div class="container">
-    <div id="chart_div" style="width: 100%; height: 700px;"></div>
-  </div>
+      var chart = new google.visualization.LineChart(document.getElementById('chart_pool'));
+      chart.draw(data, options);
+      }
 
+  function drawDS1820_1Chart() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', '');
+      data.addColumn('number', '');
+      data.addRows([
+['2016-07-11 09:25',26.375],
+['2016-07-11 09:30',26.375],
+['2016-07-11 09:35',26.375],
+['2016-07-11 09:40',26.437],
+['2016-07-11 09:45',26.437],
+['2016-07-11 09:50',26.437]
+      ]);
 
-  <div class="container">
-    <form id="datepicker" action="" class="form-horizontal" role="form" method="post">
-      <fieldset>
-        <legend>Tidsintervall</legend>
-        <div class="form-group">
-          <label for="dtp_input1" class="col-md-2 control-label">Från</label>
-          <div class="input-group date form_datetime col-md-5" data-date-format="yyyy-mm-dd hh:ii" data-link-field="dtp_input1">
-            <input id="dtp_input1_show" class="form-control" size="10" type="text" value="<?php echo $dtp_input1_show; ?>" onChange="changeDropDown()">
-            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-          </div>
-          <input type="hidden" id="dtp_input1" name="dtp_input1" value="<?php echo $dtp_input1; ?>" /><br/><br/>
+      var options = {
+      hAxis:{
+         textPosition: 'none'
+       },
+       
+      vAxis:{
+         textPosition: 'none',
+       },
+       legend: {position : 'none'},
+       chartArea:{left:0,top:0,width:'100%',height:'100%'}
+      };
 
-          <label for="dtp_input2" class="col-md-2 control-label">Till</label> 
-          <div class="input-group date form_datetime col-md-5" data-date-format="yyyy-mm-dd hh:ii" data-link-field="dtp_input2">
-            <input class="form-control" size="10" type="text" value="<?php echo $dtp_input2_show; ?>" onChange="changeDropDown()">
-            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-          </div>
-          <input type="hidden" id="dtp_input2" name="dtp_input2" value="<?php echo $dtp_input2; ?>"/><br/>
-        </div>
+      var chart = new google.visualization.LineChart(document.getElementById('DS1820_1'));
+      chart.draw(data, options);
+      }
 
-        <div class="row">
-          <div class="col-lg-2 col-md-offset-2">
-            <div class="input-group">
-              <div class="input-group-btn">
-                <button id="thebutton" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><?php echo $dropvalue; ?><span class="caret"></span></button>
-                <ul class="dropdown-menu">
-                  <li id="litid1"><a href="#">1 timme</a></li>
-                  <li id="litid6"><a href="#">6 timmar</a></li>
-                  <li id="litid24"><a href="#">24  timmar</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li id="litid99"><a href="#">Eget intervall</a></li>
-                </ul>
-              </div><!-- /btn-group -->
-            </div><!-- /input-group -->
-          </div><!-- /.col-lg-2 -->
-          <div class="col-lg-4">
-            <input type="submit" class="btn btn-default"></input>
-          </div><!-- /.col-lg-4 -->
-        </div><!-- /.row -->
-        <input type="hidden" name="dropvalue" id="dropvalue" value="<?php echo $dropvalue; ?>">
-      </fieldset>
-    </form>
-  </div>
+  function drawDS1820_2Chart() {
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', '');
+      data.addColumn('number', '');
+      data.addRows([
+['2016-07-11 09:25',26.375],
+['2016-07-11 09:30',26.375],
+['2016-07-11 09:35',26.375],
+['2016-07-11 09:40',26.437],
+['2016-07-11 09:45',26.437],
+['2016-07-11 09:50',26.437]
+      ]);
+
+      var options = {
+      hAxis:{
+         textPosition: 'none'
+       },
+       
+      vAxis:{
+         textPosition: 'none',
+       },
+       legend: {position : 'none'},
+       chartArea:{left:0,top:0,width:'100%',height:'100%'}
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('DS1820_2'));
+      chart.draw(data, options);
+      }
+
+</script>
 
   <?php
   class MyDB extends SQLite3
@@ -250,9 +352,7 @@ while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
 echo "[" . implode($array, "],\n[") . "]\n";
 echo "\t]);\n";
 echo "\tvar options = {\n";
-   //echo "\t\ttitle: 'Temperature and humidity',\n";
-//echo "\t\twidth: 1200,\n";
-//echo "\t\theight: 700,\n";
+echo "\t\tchartArea:{left:0,top:0,width:'100%',height:'100%'},\n";
 echo "\t\tcurveType: 'none',\n";
 echo "\t\tlegend: { position: 'bottom' },\n";
 echo "\t\tseries: {\n";
@@ -326,12 +426,138 @@ $db->close();
 
 <?php 
 function getMaxPoolToday(){
+  $returnVal = -1;
   $db = new MyDB();
       if(!$db){
         return "Error";
       }
-  $query = "select * from temps where timestamp > datetime('now', 'localtime', '-6 hours'); ";
-  return 25.4;
+  $query = "select max(DS18B20) from temps where timestamp > datetime('now', 'localtime', 'start of day');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
+}
+
+function getMaxDS1820_1Today(){
+  $returnVal = -1;
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select max(DS1820_1) from temps where timestamp > datetime('now', 'localtime', 'start of day');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
+}
+
+function getMaxDS1820_2Today(){
+  $returnVal = -1;
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select max(DS1820_2) from temps where timestamp > datetime('now', 'localtime', 'start of day');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
+}
+
+function getMinPoolToday(){
+  $returnVal = -1;
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select min(DS18B20) from temps where timestamp > datetime('now', 'localtime', 'start of day');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
+}
+
+function getMinDS1820_1Today(){
+  $returnVal = -1;
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select min(DS1820_1) from temps where timestamp > datetime('now', 'localtime', 'start of day');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
+}
+
+function getMinDS1820_2Today(){
+  $returnVal = -1;
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select min(DS1820_2) from temps where timestamp > datetime('now', 'localtime', 'start of day');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
+}
+
+function getPoolTempNow(){
+  $returnVal = -1;
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select DS18B20 from temps order by timestamp desc limit 1;";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
+}
+
+function getDS1820_1TempNow(){
+  $returnVal = -1;
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select DS1820_1 from temps order by timestamp desc limit 1;";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
+}
+
+function getDS1820_2TempNow(){
+  $returnVal = -1;
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select DS1820_2 from temps order by timestamp desc limit 1;";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+      while($row = $result->fetchArray(SQLITE3_NUM) ){
+       $returnVal = $row[0];
+    }
+    $db->close();
+  return $returnVal;
 }
 ?>
 
