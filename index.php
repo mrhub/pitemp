@@ -339,21 +339,27 @@ echo '<script type="text/javascript">' . "\n";
 echo "\t" . 'google.load("visualization", "1", {packages:["corechart"]});' . "\n";
 echo "\t" . 'google.setOnLoadCallback(drawChart);' . "\n";
 echo "\t" . 'function drawChart() {' . "\n";
-echo "\t\t" . 'var data = google.visualization.arrayToDataTable([' . "\n";
-echo "\t\t" . "['timestamp', 'DS1820_1', 'DS1820_2', 'DS18B20'],\n";
+//echo "\t\t" . 'var data = google.visualization.arrayToDataTable([' . "\n";
+//echo "\t\t" . "['timestamp', 'DS1820_1', 'DS1820_2', 'DS18B20'],\n";
+echo "\t\tvar data = new google.visualization.DataTable();\n";
+echo "\t\tdata.addColumn('datetime','timestamp');\n";
+echo "\t\tdata.addColumn('number','DS1820_1');\n";
+echo "\t\tdata.addColumn('number','DS1820_2');\n";
+echo "\t\tdata.addColumn('number','DS18B20');\n";
+echo "\t\tdata.addRows([\n";
 $ret = $db->query($sql);
 $array = array();
 $dateArray = array();
 $index = 0;
 while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
   $arr = [];
-  array_push($arr, "'" . substr($row['timestamp'],0,-3) . "'");
+  array_push($arr, "new Date(" . convertToDateFormat($row['timestamp']) . ")");
   array_push($arr, "" . $row['DS1820_1'] . "");
   array_push($arr, "" . $row['DS1820_2'] . "");
   array_push($arr, "" . $row['DS18B20'] . "");
   array_push($array, implode($arr, ","));
   if ($index++ % 10 == 0) {
-    array_push($dateArray, "'" . substr($row['timestamp'],0,-3) . "'");
+    array_push($dateArray, "(" . convertToDateFormat($row['timestamp']) . ")");
   }
   
 }
@@ -372,8 +378,8 @@ echo "\t\tlegend: { position: 'bottom' },\n";
 //echo "\t\t0: {targetAxisIndex: 0}\n";
 //echo "\t\t},\n";
 echo "\t\thAxis: {\n";
-echo "\t\t\ttics: [" . implode($dateArray, ",") . "]\n";
-//echo "\t\t\t\n"
+//echo "\t\t\ttics: [" . implode($dateArray, ",") . "]\n";
+echo "\t\t\tformat: 'yyyy-mm-dd\\nhh:MM'\n";
 //echo "\t\t\t\n"
 echo "\t\t},\n";
 echo "\t\tvAxes: {\n";
@@ -385,7 +391,7 @@ echo "\t\tvar chart = new google.visualization.LineChart(document.getElementById
 echo "\t\tchart.draw(data, options);\n";
 echo "\t}\n";
 echo "\t</script>\n";
-echo implode($dateArray, ",");
+//echo implode($dateArray, ",");
 $db->close();
 ?>
 
@@ -443,6 +449,18 @@ $db->close();
 ?>
 
 <?php 
+function convertToDateFormat($date){
+  //2016-07-11 22:00:04
+  $date = DateTime::createFromFormat('Y-m-d G:i:s', $date);
+  return 
+      $date->format('Y') . "," . 
+      $date->format('m') . "," . 
+      $date->format('d') . "," . 
+      $date->format('G') . "," . 
+      $date->format('i') . "," . 
+      $date->format('s');
+}
+
 function getMaxPoolToday(){
   $returnVal = -1;
   $db = new MyDB();
