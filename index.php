@@ -40,33 +40,33 @@ if (!empty($_POST["dropvalue"])){
     <div class="row">
         <div class="col-md-4">
           <div class="panel panel-default">
-            <div class="panel-heading"><h3>Pool : <?php echo getPoolTempNow(); ?> &deg;C</h3></div>
+            <div class="panel-heading"><h4>Pool : <?php echo getPoolTempNow(); ?> &deg;C</h4></div>
             <div class="panel-body">
               Max temp idag : <?php echo getMaxPoolToday(); ?> &deg;C<br/>
               Min temp idag : <?php echo getMinPoolToday(); ?> &deg;C<br/>
-              <h4>Senaste 30 minuterna:</h4>
+              <h5>Senaste 30 minuterna:</h5>
               <div id="chart_pool"></div>
             </div>
           </div>
         </div>
         <div class="col-md-4">
           <div class="panel panel-default">
-            <div class="panel-heading"><h3>DS1820_1 : <?php echo getDS1820_1TempNow(); ?> &deg;C</h3></div>
+            <div class="panel-heading"><h4>DS1820_1 : <?php echo getDS1820_1TempNow(); ?> &deg;C</h4></div>
             <div class="panel-body">
               Max temp idag : <?php echo getMaxDS1820_1Today(); ?> &deg;C<br/>
               Min temp idag : <?php echo getMinDS1820_1Today(); ?> &deg;C<br/>
-              <h4>Senaste 30 minuterna:</h4>
+              <h5>Senaste 30 minuterna:</h5>
               <div id="DS1820_1"></div>
             </div>
           </div>
         </div>
         <div class="col-md-4">
           <div class="panel panel-default">
-            <div class="panel-heading"><h3>DS1820_2 : <?php echo getDS1820_2TempNow(); ?> &deg;C</h3></div>
+            <div class="panel-heading"><h4>DS1820_2 : <?php echo getDS1820_2TempNow(); ?> &deg;C</h4></div>
             <div class="panel-body">
               Max temp idag : <?php echo getMaxDS1820_2Today(); ?> &deg;C<br/>
               Min temp idag : <?php echo getMinDS1820_2Today(); ?> &deg;C<br/>
-              <h4>Senaste 30 minuterna:</h4>
+              <h5>Senaste 30 minuterna:</h5>
               <div id="DS1820_2"></div>
             </div>
           </div>
@@ -219,24 +219,28 @@ google.setOnLoadCallback(drawDS1820_2Chart);
 
   function drawPoolChart() {
       var data = new google.visualization.DataTable();
-      data.addColumn('string', '');
+      data.addColumn('datetime', '');
       data.addColumn('number', '');
       data.addRows([
-['2016-07-11 09:25',26.375],
-['2016-07-11 09:30',26.375],
-['2016-07-11 09:35',26.375],
-['2016-07-11 09:40',26.437],
-['2016-07-11 09:45',26.437],
-['2016-07-11 09:50',26.437]
+        <?php echo getPoolTemp30Min(); ?>
+        /*
+[new Date(2016,07,11,09,25),26.375],
+[new Date(2016,07,11,09,30),26.375],
+[new Date(2016,07,11,09,35),26.375],
+[new Date(2016,07,11,09,40),26.437],
+[new Date(2016,07,11,09,45),26.437],
+[new Date(2016,07,11,09,50),26.437]*/
       ]);
 
       var options = {
+        colors: ['orange'],
+        height: 150,
       hAxis:{
-         textPosition: 'none'
+         textPosition: 'in'
        },
        
       vAxis:{
-         textPosition: 'none',
+         textPosition: 'in',
        },
        legend: {position : 'none'},
        chartArea:{left:0,top:0,width:'100%',height:'100%'}
@@ -248,24 +252,27 @@ google.setOnLoadCallback(drawDS1820_2Chart);
 
   function drawDS1820_1Chart() {
       var data = new google.visualization.DataTable();
-      data.addColumn('string', '');
+      data.addColumn('datetime', '');
       data.addColumn('number', '');
       data.addRows([
+        <?php echo getDS1820_1Temp30Min(); ?>
+        /*
 ['2016-07-11 09:25',26.375],
 ['2016-07-11 09:30',26.375],
 ['2016-07-11 09:35',26.375],
 ['2016-07-11 09:40',26.437],
 ['2016-07-11 09:45',26.437],
-['2016-07-11 09:50',26.437]
+['2016-07-11 09:50',26.437]*/
       ]);
 
       var options = {
+        height: 150,
       hAxis:{
-         textPosition: 'none'
+         textPosition: 'in'
        },
        
       vAxis:{
-         textPosition: 'none',
+         textPosition: 'in',
        },
        legend: {position : 'none'},
        chartArea:{left:0,top:0,width:'100%',height:'100%'}
@@ -277,24 +284,28 @@ google.setOnLoadCallback(drawDS1820_2Chart);
 
   function drawDS1820_2Chart() {
       var data = new google.visualization.DataTable();
-      data.addColumn('string', '');
+      data.addColumn('datetime', '');
       data.addColumn('number', '');
       data.addRows([
+        <?php echo getDS1820_2Temp30Min(); ?>
+        /*
 ['2016-07-11 09:25',26.375],
 ['2016-07-11 09:30',26.375],
 ['2016-07-11 09:35',26.375],
 ['2016-07-11 09:40',26.437],
 ['2016-07-11 09:45',26.437],
-['2016-07-11 09:50',26.437]
+['2016-07-11 09:50',26.437]*/
       ]);
 
       var options = {
+        colors: ['red'],
+        height: 150,
       hAxis:{
-         textPosition: 'none'
+         textPosition: 'in'
        },
        
       vAxis:{
-         textPosition: 'none',
+         textPosition: 'in',
        },
        legend: {position : 'none'},
        chartArea:{left:0,top:0,width:'100%',height:'100%'}
@@ -349,8 +360,6 @@ echo "\t\tdata.addColumn('number','DS18B20');\n";
 echo "\t\tdata.addRows([\n";
 $ret = $db->query($sql);
 $array = array();
-$dateArray = array();
-$index = 0;
 while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
   $arr = [];
   array_push($arr, "new Date(" . convertToDateFormat($row['timestamp']) . ")");
@@ -358,9 +367,6 @@ while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
   array_push($arr, "" . $row['DS1820_2'] . "");
   array_push($arr, "" . $row['DS18B20'] . "");
   array_push($array, implode($arr, ","));
-  if ($index++ % 10 == 0) {
-    array_push($dateArray, "(" . convertToDateFormat($row['timestamp']) . ")");
-  }
   
 }
 echo "[" . implode($array, "],\n[") . "]\n";
@@ -370,7 +376,7 @@ echo "\tvar options = {\n";
 echo "\t\tchartArea:{";
 //echo "left:10,";
 echo "top:10,";
-echo "width:'90%',";
+echo "width:'100%',";
 echo "height:'70%'},\n";
 echo "\t\tcurveType: 'none',\n";
 echo "\t\tlegend: { position: 'bottom' },\n";
@@ -378,20 +384,20 @@ echo "\t\tlegend: { position: 'bottom' },\n";
 //echo "\t\t0: {targetAxisIndex: 0}\n";
 //echo "\t\t},\n";
 echo "\t\thAxis: {\n";
-//echo "\t\t\ttics: [" . implode($dateArray, ",") . "]\n";
 echo "\t\t\tformat: 'yyyy-mm-dd\\nhh:MM'\n";
-//echo "\t\t\t\n"
 echo "\t\t},\n";
-echo "\t\tvAxes: {\n";
+echo "\t\tvAxis: {\n";
+echo "\t\t\ttextPosition: 'in'\n";
+echo "\t\t},\n";
+//echo "\t\tvAxes: {\n";
 //echo "\t\t// Adds titles to each axis.\n";
-echo "\t\t0: {title: 'Temperature (Celsius)'}\n";
-echo "\t\t},\n";
+//echo "\t\t0: {title: 'Temperature (Celsius)'}\n";
+//echo "\t\t},\n";
 echo "\t\t};\n";
 echo "\t\tvar chart = new google.visualization.LineChart(document.getElementById('chart_div'));\n";
 echo "\t\tchart.draw(data, options);\n";
 echo "\t}\n";
 echo "\t</script>\n";
-//echo implode($dateArray, ",");
 $db->close();
 ?>
 
@@ -416,8 +422,6 @@ $db->close();
        $query = "select * from temps where timestamp > datetime('" . $dtp_input1 . "')";
        $query = $query . " and timestamp < datetime('" . $dtp_input2 . "')";
      }
-
-      //echo $query . "</br>";
 
      $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
      $num_columns =  $result->numColumns(); 
@@ -595,6 +599,61 @@ function getDS1820_2TempNow(){
     $db->close();
   return $returnVal;
 }
+
+function getPoolTemp30Min(){
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select timestamp, DS18B20 from temps where timestamp > datetime('now', 'localtime', '-30 minutes');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+  $array = array();
+    while($row = $result->fetchArray(SQLITE3_NUM) ){
+      $arr = [];
+      array_push($arr, "new Date(" . convertToDateFormat($row[0]) . ")");
+      array_push($arr, "" . $row[1] . "");
+      array_push($array, implode($arr, ","));
+      }
+    $db->close();
+    return "[" . implode($array, "],\n[") . "]\n";
+}
+
+function getDS1820_1Temp30Min(){
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select timestamp, DS1820_1 from temps where timestamp > datetime('now', 'localtime', '-30 minutes');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+  $array = array();
+    while($row = $result->fetchArray(SQLITE3_NUM) ){
+      $arr = [];
+      array_push($arr, "new Date(" . convertToDateFormat($row[0]) . ")");
+      array_push($arr, "" . $row[1] . "");
+      array_push($array, implode($arr, ","));
+      }
+    $db->close();
+    return "[" . implode($array, "],\n[") . "]\n";
+}
+
+function getDS1820_2Temp30Min(){
+  $db = new MyDB();
+      if(!$db){
+        return "Error";
+      }
+  $query = "select timestamp, DS1820_2 from temps where timestamp > datetime('now', 'localtime', '-30 minutes');";
+  $result = $db->query($query) or die("Error in query: <span style='color:red;'>$query</span>"); 
+  $array = array();
+    while($row = $result->fetchArray(SQLITE3_NUM) ){
+      $arr = [];
+      array_push($arr, "new Date(" . convertToDateFormat($row[0]) . ")");
+      array_push($arr, "" . $row[1] . "");
+      array_push($array, implode($arr, ","));
+      }
+    $db->close();
+    return "[" . implode($array, "],\n[") . "]\n";
+}
+
 ?>
 
 </body>
