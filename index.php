@@ -135,6 +135,9 @@ if (!empty($_POST["dropvalue"])){
     $(window).resize(function(){
         //console.log("drawChart from resize");
         drawChart();
+        drawPoolChart();
+        drawDS1820_1Chart();
+        drawDS1820_2Chart();
     });
   });
 
@@ -209,10 +212,9 @@ if (indate == ""){
 
 </script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<!--<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>-->
 <script type="text/javascript">
-//google.load('current', {packages: ['corechart', 'line']});
 google.load("visualization", "1", {packages:["corechart"]});
+google.setOnLoadCallback(drawChart);
 google.setOnLoadCallback(drawPoolChart);
 google.setOnLoadCallback(drawDS1820_1Chart);
 google.setOnLoadCallback(drawDS1820_2Chart);
@@ -223,13 +225,6 @@ google.setOnLoadCallback(drawDS1820_2Chart);
       data.addColumn('number', '');
       data.addRows([
         <?php echo getPoolTemp30Min(); ?>
-        /*
-[new Date(2016,07,11,09,25),26.375],
-[new Date(2016,07,11,09,30),26.375],
-[new Date(2016,07,11,09,35),26.375],
-[new Date(2016,07,11,09,40),26.437],
-[new Date(2016,07,11,09,45),26.437],
-[new Date(2016,07,11,09,50),26.437]*/
       ]);
 
       var options = {
@@ -256,13 +251,6 @@ google.setOnLoadCallback(drawDS1820_2Chart);
       data.addColumn('number', '');
       data.addRows([
         <?php echo getDS1820_1Temp30Min(); ?>
-        /*
-['2016-07-11 09:25',26.375],
-['2016-07-11 09:30',26.375],
-['2016-07-11 09:35',26.375],
-['2016-07-11 09:40',26.437],
-['2016-07-11 09:45',26.437],
-['2016-07-11 09:50',26.437]*/
       ]);
 
       var options = {
@@ -288,13 +276,6 @@ google.setOnLoadCallback(drawDS1820_2Chart);
       data.addColumn('number', '');
       data.addRows([
         <?php echo getDS1820_2Temp30Min(); ?>
-        /*
-['2016-07-11 09:25',26.375],
-['2016-07-11 09:30',26.375],
-['2016-07-11 09:35',26.375],
-['2016-07-11 09:40',26.437],
-['2016-07-11 09:45',26.437],
-['2016-07-11 09:50',26.437]*/
       ]);
 
       var options = {
@@ -315,9 +296,74 @@ google.setOnLoadCallback(drawDS1820_2Chart);
       chart.draw(data, options);
       }
 
+      
+  function drawChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('datetime','timestamp');
+    data.addColumn('number','DS1820_1');
+    data.addColumn('number','DS1820_2');
+    data.addColumn('number','DS18B20');
+
+<?php
+  class MyDB extends SQLite3
+  {
+    function __construct()
+    {
+     $this->open('templog.db');
+   }
+ }
+
+ $db = new MyDB();
+ if(!$db){
+  echo $db->lastErrorMsg();
+} else {
+      //echo "Opened database successfully\n";
+}
+if (substr($dropvalue, 0, 1) == "6") {
+  $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-6 hours');";
+} else if (substr($dropvalue, 0, 1) == "1"){
+  $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-1 hours'); ";
+} else if (substr($dropvalue, 0, 2) == "24") {
+  $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-24 hours');";
+} else{
+
+ $sql = "select * from temps where timestamp > datetime('" . $dtp_input1 . "')";
+ $sql = $sql . " and timestamp < datetime('" . $dtp_input2 . "')";
+       //echo $sql . "</br>";
+}
+echo "\t\tdata.addRows([\n";
+$ret = $db->query($sql);
+$array = array();
+while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
+  $arr = [];
+  array_push($arr, "new Date(" . convertToDateFormat($row['timestamp']) . ")");
+  array_push($arr, "" . $row['DS1820_1'] . "");
+  array_push($arr, "" . $row['DS1820_2'] . "");
+  array_push($arr, "" . $row['DS18B20'] . "");
+  array_push($array, implode($arr, ","));
+}
+echo "[" . implode($array, "],\n[") . "]\n";
+echo "\t]);\n";
+?>
+    var options = {
+    chartArea:{top:10,width:'100%',height:'70%'},
+    curveType: 'none',
+    legend: { position: 'bottom' },
+    hAxis: {
+      format: 'yyyy-mm-dd\nhh:MM'
+    },
+    vAxis: {
+      textPosition: 'in'
+    },
+    };
+    var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+  }
+
 </script>
 
   <?php
+  /*
   class MyDB extends SQLite3
   {
     function __construct()
@@ -347,7 +393,7 @@ if (substr($dropvalue, 0, 1) == "6") {
 
 //echo '<script type="text/javascript" src="https://www.google.com/jsapi"></script>' . "\n";
 echo '<script type="text/javascript">' . "\n";
-echo "\t" . 'google.load("visualization", "1", {packages:["corechart"]});' . "\n";
+//echo "\t" . 'google.load("visualization", "1", {packages:["corechart"]});' . "\n";
 echo "\t" . 'google.setOnLoadCallback(drawChart);' . "\n";
 echo "\t" . 'function drawChart() {' . "\n";
 //echo "\t\t" . 'var data = google.visualization.arrayToDataTable([' . "\n";
@@ -398,7 +444,7 @@ echo "\t\tvar chart = new google.visualization.LineChart(document.getElementById
 echo "\t\tchart.draw(data, options);\n";
 echo "\t}\n";
 echo "\t</script>\n";
-$db->close();
+$db->close();*/
 ?>
 
 <div class="container">
