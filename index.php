@@ -129,7 +129,14 @@ if (!empty($_POST["dropvalue"])){
   <script type="text/javascript" src="./bootstrap/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="./js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
   <script type="text/javascript" src="./js/locales/bootstrap-datetimepicker.sv.js" charset="UTF-8"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
   <script type="text/javascript">
+
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback(drawChart);
+  google.setOnLoadCallback(drawPoolChart);
+  google.setOnLoadCallback(drawDS1820_1Chart);
+  google.setOnLoadCallback(drawDS1820_2Chart);
 
   $(document).ready(function () {
     $(window).resize(function(){
@@ -204,20 +211,6 @@ if (indate == ""){
     $(datafield).attr("value", value.substring(0, 10) + " " + indate.getHours() + ":" + indate.getMinutes() + ":" + indate.getSeconds());
   }
 }
-
-  Date.prototype.addHours= function(h){
-    this.setHours(this.getHours()+h);
-    return this;
-  }
-
-</script>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-google.load("visualization", "1", {packages:["corechart"]});
-google.setOnLoadCallback(drawChart);
-google.setOnLoadCallback(drawPoolChart);
-google.setOnLoadCallback(drawDS1820_1Chart);
-google.setOnLoadCallback(drawDS1820_2Chart);
 
   function drawPoolChart() {
       var data = new google.visualization.DataTable();
@@ -302,7 +295,7 @@ google.setOnLoadCallback(drawDS1820_2Chart);
     data.addColumn('datetime','timestamp');
     data.addColumn('number','DS1820_1');
     data.addColumn('number','DS1820_2');
-    data.addColumn('number','DS18B20');
+    data.addColumn('number','Pool');
 
 <?php
   class MyDB extends SQLite3
@@ -360,92 +353,12 @@ echo "\t]);\n";
     chart.draw(data, options);
   }
 
+  Date.prototype.addHours= function(h){
+    this.setHours(this.getHours()+h);
+    return this;
+  }
+
 </script>
-
-  <?php
-  /*
-  class MyDB extends SQLite3
-  {
-    function __construct()
-    {
-     $this->open('templog.db');
-   }
- }
-
- $db = new MyDB();
- if(!$db){
-  echo $db->lastErrorMsg();
-} else {
-      //echo "Opened database successfully\n";
-}
-if (substr($dropvalue, 0, 1) == "6") {
-  $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-6 hours');";
-} else if (substr($dropvalue, 0, 1) == "1"){
-  $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-1 hours'); ";
-} else if (substr($dropvalue, 0, 2) == "24") {
-  $sql = "select * from temps where timestamp > datetime('now', 'localtime', '-24 hours');";
-} else{
-
- $sql = "select * from temps where timestamp > datetime('" . $dtp_input1 . "')";
- $sql = $sql . " and timestamp < datetime('" . $dtp_input2 . "')";
-       //echo $sql . "</br>";
-}
-
-//echo '<script type="text/javascript" src="https://www.google.com/jsapi"></script>' . "\n";
-echo '<script type="text/javascript">' . "\n";
-//echo "\t" . 'google.load("visualization", "1", {packages:["corechart"]});' . "\n";
-echo "\t" . 'google.setOnLoadCallback(drawChart);' . "\n";
-echo "\t" . 'function drawChart() {' . "\n";
-//echo "\t\t" . 'var data = google.visualization.arrayToDataTable([' . "\n";
-//echo "\t\t" . "['timestamp', 'DS1820_1', 'DS1820_2', 'DS18B20'],\n";
-echo "\t\tvar data = new google.visualization.DataTable();\n";
-echo "\t\tdata.addColumn('datetime','timestamp');\n";
-echo "\t\tdata.addColumn('number','DS1820_1');\n";
-echo "\t\tdata.addColumn('number','DS1820_2');\n";
-echo "\t\tdata.addColumn('number','DS18B20');\n";
-echo "\t\tdata.addRows([\n";
-$ret = $db->query($sql);
-$array = array();
-while($row = $ret->fetchArray(SQLITE3_ASSOC) ){
-  $arr = [];
-  array_push($arr, "new Date(" . convertToDateFormat($row['timestamp']) . ")");
-  array_push($arr, "" . $row['DS1820_1'] . "");
-  array_push($arr, "" . $row['DS1820_2'] . "");
-  array_push($arr, "" . $row['DS18B20'] . "");
-  array_push($array, implode($arr, ","));
-  
-}
-echo "[" . implode($array, "],\n[") . "]\n";
-echo "\t]);\n";
-echo "\tvar options = {\n";
-//echo "\t\tchartArea:{left:10,top:10,width:'80%',height:'80%'},\n";
-echo "\t\tchartArea:{";
-//echo "left:10,";
-echo "top:10,";
-echo "width:'100%',";
-echo "height:'70%'},\n";
-echo "\t\tcurveType: 'none',\n";
-echo "\t\tlegend: { position: 'bottom' },\n";
-//echo "\t\tseries: {\n";
-//echo "\t\t0: {targetAxisIndex: 0}\n";
-//echo "\t\t},\n";
-echo "\t\thAxis: {\n";
-echo "\t\t\tformat: 'yyyy-mm-dd\\nhh:MM'\n";
-echo "\t\t},\n";
-echo "\t\tvAxis: {\n";
-echo "\t\t\ttextPosition: 'in'\n";
-echo "\t\t},\n";
-//echo "\t\tvAxes: {\n";
-//echo "\t\t// Adds titles to each axis.\n";
-//echo "\t\t0: {title: 'Temperature (Celsius)'}\n";
-//echo "\t\t},\n";
-echo "\t\t};\n";
-echo "\t\tvar chart = new google.visualization.LineChart(document.getElementById('chart_div'));\n";
-echo "\t\tchart.draw(data, options);\n";
-echo "\t}\n";
-echo "\t</script>\n";
-$db->close();*/
-?>
 
 <div class="container">
   <h2>Raw data</h2>
