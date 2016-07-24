@@ -346,7 +346,7 @@ echo "\t]);\n";
     curveType: 'none',
     legend: { position: 'bottom' },
     hAxis: {
-      format: 'yyyy-mm-dd\nhh:MM'
+      format: 'yyyy-MM-dd\nHH:mm'
     },
     vAxis: {
       textPosition: 'in'
@@ -420,7 +420,7 @@ function convertToDateFormat($date){
   $date = DateTime::createFromFormat('Y-m-d G:i:s', $date);
   return 
       $date->format('Y') . "," . 
-      $date->format('m') . "," . 
+      intval($date->format('m')-1) . "," . 
       $date->format('d') . "," . 
       $date->format('G') . "," . 
       $date->format('i') . "," . 
